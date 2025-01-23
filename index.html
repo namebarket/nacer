@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Friends</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        #chat-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        #chat-window {
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        #chat-window .message {
+            margin: 10px 0;
+        }
+        #chat-window .message p {
+            margin: 5px 0;
+        }
+        #chat-window .message.sender {
+            text-align: right;
+        }
+        #message-form {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+        #message-form input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-right: 1px solid #ddd;
+        }
+        #message-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #message-form button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <div id="chat-window">
+            <!-- الرسائل ستُضاف هنا -->
+        </div>
+        <form id="message-form">
+            <input type="text" id="message-input" placeholder="اكتب رسالة..." required>
+            <button type="submit">إرسال</button>
+        </form>
+    </div>
+
+    <script>
+        const chatWindow = document.getElementById('chat-window');
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('message-input');
+
+        const socket = new WebSocket('ws://localhost:3000');
+
+        // عند استقبال رسالة
+        socket.onmessage = (event) => {
+            const message = event.data;
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.innerHTML = `<p>${message}</p>`;
+            chatWindow.appendChild(messageDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        };
+
+        // عند إرسال رسالة
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = messageInput.value;
+            socket.send(message);
+            const senderDiv = document.createElement('div');
+            senderDiv.classList.add('message', 'sender');
+            senderDiv.innerHTML = `<p>${message}</p>`;
+            chatWindow.appendChild(senderDiv);
+            messageInput.value = '';
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        });
+    </script>
+</body>
+</html>
